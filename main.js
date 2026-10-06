@@ -1,4 +1,5 @@
 import { setupSun, drawSun } from './components/sun/sun.js';
+import { setupClouds, drawClouds } from './components/clouds/clouds.js';
 import { setupOcean, drawOcean } from './components/ocean/ocean.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
@@ -13,6 +14,7 @@ if (!gl) {
 
 async function start() {
     const sun = await setupSun(gl);
+    const clouds = await setupClouds(gl);
     const ocean = await setupOcean(gl);
 
     function render() {
@@ -35,6 +37,8 @@ async function start() {
 
 
         drawSun(gl, matrix4, sun, viewProjectionMatrix);
+        drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [-12, 15, -10]);
+        drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix);
 
         requestAnimationFrame(render);
