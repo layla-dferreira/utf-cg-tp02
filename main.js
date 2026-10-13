@@ -1,6 +1,7 @@
 import { setupSun, drawSun } from './components/sun/sun.js';
 import { setupClouds, drawClouds } from './components/clouds/clouds.js';
 import { setupOcean, drawOcean } from './components/ocean/ocean.js';
+import { setupGoingMerry, drawGoingMerry } from './components/goingMerry/goingMerry.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
 const gl = canvas.getContext('webgl2');
@@ -16,6 +17,7 @@ async function start() {
     const sun = await setupSun(gl);
     const clouds = await setupClouds(gl);
     const ocean = await setupOcean(gl);
+    const goingMerry = await setupGoingMerry(gl);
 
     function render() {
         twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -39,6 +41,7 @@ async function start() {
         drawSun(gl, matrix4, sun, viewProjectionMatrix);
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [-12, 15, -10]);
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
+        drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix);
 
         requestAnimationFrame(render);
