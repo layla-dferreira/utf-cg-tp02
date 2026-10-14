@@ -18,7 +18,7 @@ export async function setupOcean(gl) {
     );
 
     const programInfo = twgl.createProgramInfoFromProgram(gl, program);
-    const bufferInfo = twgl.primitives.createDiscBufferInfo(gl, 15, 64);
+    const bufferInfo = twgl.primitives.createDiscBufferInfo(gl, 20, 64);
 
     return { 
         programInfo, 
