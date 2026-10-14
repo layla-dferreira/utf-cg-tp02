@@ -30,11 +30,8 @@ export function drawOcean(gl, matrix4, oceanData, model) {
     gl.useProgram(oceanData.programInfo.program);
     twgl.setBuffersAndAttributes(gl, oceanData.programInfo, oceanData.bufferInfo);
 
-    const rotMatrix = matrix4.rotationX(-Math.PI / 2);
-    const modelMatrix = matrix4.multiply(model, rotMatrix);
-
     twgl.setUniforms(oceanData.programInfo, {
-        model: modelMatrix,
+        model: model,
     });
 
     twgl.drawBufferInfo(gl, oceanData.bufferInfo);
