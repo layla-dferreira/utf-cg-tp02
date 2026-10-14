@@ -3,6 +3,7 @@ import { setupClouds, drawClouds } from './components/clouds/clouds.js';
 import { setupOcean, drawOcean } from './components/ocean/ocean.js';
 import { setupGoingMerry, drawGoingMerry } from './components/goingMerry/goingMerry.js';
 import { setupChopper, drawChopper } from './components/chopper/chopper.js';
+import { setupKaru, drawKaru } from './components/karu/karu.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
 const gl = canvas.getContext('webgl2');
@@ -98,6 +99,7 @@ async function start() {
     const ocean = await setupOcean(gl);
     const goingMerry = await setupGoingMerry(gl);
     const chopper = await setupChopper(gl);
+    const karu = await setupKaru(gl);
 
     function render(time) {
         const seconds = time * 0.01;
@@ -161,6 +163,7 @@ async function start() {
         drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix);
         drawChopper(gl, matrix4, chopper, viewProjectionMatrix);
+        drawKaru(gl, matrix4, karu, viewProjectionMatrix);
         
         requestAnimationFrame(render);
     }
