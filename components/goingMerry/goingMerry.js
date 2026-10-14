@@ -27,11 +27,14 @@ export async function setupGoingMerry(gl) {
     const objText = await objResponse.text();
 
     const mtlResponse = await fetch('./assets/goingMerry/goingMerry.mtl');
-    if (!mtlResponse || !mtlResponse.ok) {
+    if (!mtlResponse.ok) {
         console.error(`ERRO: Não foi possível descarregar o ficheiro MTL (${nomeFicheiroMTL}).`);
     }
     
-    const mtlText = await mtlResponse.ok ? await mtlResponse.text() : null;
+    let mtlText = null;
+    if (mtlResponse.ok) {
+        mtlText = await mtlResponse.text();
+    }
 
     const meshes = parseOBJ(objText, mtlText);
 
@@ -58,7 +61,7 @@ export async function setupGoingMerry(gl) {
 }
 
 export function drawGoingMerry(gl, matrix4, merryData, viewProjectionMatrix) {
-    if (!merryData || !merryData.meshes) return;
+    if (!merryData?.meshes) return;
 
     gl.useProgram(merryData.programInfo.program);
 

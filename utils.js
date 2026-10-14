@@ -63,42 +63,87 @@ export function createTexture(gl, image) {
     return texture;
 }
 
-export function parseOBJ(objText, mtlText) {
+function parseMTL(mtlText) {
     const materialsMap = {};
-    if (mtlText) {
-        let currentMtl = null;
-        for (let line of mtlText.split('\n')) {
-            line = line.trim();
-            const lineLower = line.toLowerCase(); 
+    if (!mtlText) return materialsMap;
 
-            if (lineLower.startsWith('newmtl ')) {
-                currentMtl = line.substring(7).trim();
-                materialsMap[currentMtl] = {};
-            } else if (lineLower.startsWith('map_kd ') && currentMtl) {
-                materialsMap[currentMtl].texture = line.substring(7).trim();
-            }
+    let currentMtl = null;
+    for (let line of mtlText.split('\n')) {
+        line = line.trim();
+        const lineLower = line.toLowerCase();
+
+        if (lineLower.startsWith('newmtl ')) {
+            currentMtl = line.substring(7).trim();
+            materialsMap[currentMtl] = {};
+        } else if (lineLower.startsWith('map_kd ') && currentMtl) {
+            materialsMap[currentMtl].texture = line.substring(7).trim();
         }
-    } 
+    }
+    return materialsMap;
+}
 
-    const lines = objText.split('\n');
-    const objPositions = [[0, 0, 0]];
-    const objTexcoords = [[0, 0]];
-    const objNormals = [[0, 0, 0]];
+function processVertex(vertStr, state) {
+    if (state.webglIndicesMap.has(vertStr)) {
+        state.indices.push(state.webglIndicesMap.get(vertStr));
+        return;
+    }
+
+    const indicesParts = vertStr.split('/');
+    
+    let pIdx = Number.parseInt(indicesParts[0]) || 0;
+    pIdx = pIdx < 0 ? state.objPositions.length + pIdx : pIdx;
+
+    let tIdx = Number.parseInt(indicesParts[1]) || 0;
+    tIdx = tIdx < 0 ? state.objTexcoords.length + tIdx : tIdx;
+
+    let nIdx = Number.parseInt(indicesParts[2]) || 0;
+    nIdx = nIdx < 0 ? state.objNormals.length + nIdx : nIdx;
+
+    const pos = state.objPositions[pIdx] || [0, 0, 0];
+    const tex = state.objTexcoords[tIdx] || [0, 0];
+    const norm = state.objNormals[nIdx] || [0, 0, 0];
+
+    state.positions.push(...pos);
+    state.texCoords.push(...tex);
+    state.normals.push(...norm);
+
+    state.webglIndicesMap.set(vertStr, state.nextIndex);
+    state.indices.push(state.nextIndex);
+    state.nextIndex++;
+}
+
+function processFace(parts, state) {
+    const faceVertices = parts.slice(1);
+    for (let i = 1; i < faceVertices.length - 1; i++) {
+        const triIndices = [faceVertices[0], faceVertices[i], faceVertices[i + 1]];
+        for (const vertStr of triIndices) {
+            processVertex(vertStr, state);
+        }
+    }
+}
+
+export function parseOBJ(objText, mtlText) {
+    const materialsMap = parseMTL(mtlText);
+
+    const state = {
+        objPositions: [[0, 0, 0]],
+        objTexcoords: [[0, 0]],
+        objNormals: [[0, 0, 0]],
+        positions: [],
+        texCoords: [],
+        normals: [],
+        indices: [],
+        webglIndicesMap: new Map(),
+        nextIndex: 0
+    };
 
     let subMeshes = [];
     let currentMaterial = 'default';
-    
-    let positions = [];
-    let texCoords = [];
-    let normals = [];
-    let indices = [];
-    let webglIndicesMap = new Map();
-    let nextIndex = 0;
 
     function flushSubMesh() {
-        if (positions.length > 0) {
+        if (state.positions.length > 0) {
             let textureFile = null;
-            if (materialsMap[currentMaterial] && materialsMap[currentMaterial].texture) {
+            if (materialsMap[currentMaterial]?.texture) {
                 textureFile = materialsMap[currentMaterial].texture;
             }
 
@@ -106,21 +151,22 @@ export function parseOBJ(objText, mtlText) {
                 materialName: currentMaterial,
                 textureFile: textureFile,
                 arrays: {
-                    position: new Float32Array(positions),
-                    texcoord: new Float32Array(texCoords),
-                    normal: new Float32Array(normals),
-                    indices: new Uint16Array(indices)
+                    position: new Float32Array(state.positions),
+                    texcoord: new Float32Array(state.texCoords),
+                    normal: new Float32Array(state.normals),
+                    indices: new Uint16Array(state.indices)
                 }
             });
-            positions = [];
-            texCoords = [];
-            normals = [];
-            indices = [];
-            webglIndicesMap.clear();
-            nextIndex = 0;
+            state.positions = [];
+            state.texCoords = [];
+            state.normals = [];
+            state.indices = [];
+            state.webglIndicesMap.clear();
+            state.nextIndex = 0;
         }
     }
 
+    const lines = objText.split('\n');
     for (let line of lines) {
         line = line.trim();
         if (line.startsWith('#') || line === '') continue;
@@ -129,49 +175,19 @@ export function parseOBJ(objText, mtlText) {
         const type = parts[0];
 
         if (type === 'v') {
-            objPositions.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
+            state.objPositions.push([Number(parts[1]), Number(parts[2]), Number(parts[3])]);
         } else if (type === 'vt') {
-            objTexcoords.push([parseFloat(parts[1]), parseFloat(parts[2])]);
+            state.objTexcoords.push([Number(parts[1]), Number(parts[2])]);
         } else if (type === 'vn') {
-            objNormals.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
+            state.objNormals.push([Number(parts[1]), Number(parts[2]), Number(parts[3])]);
         } else if (type === 'usemtl') {
             flushSubMesh();
             currentMaterial = parts[1];
         } else if (type === 'f') {
-            const faceVertices = parts.slice(1);
-            for (let i = 1; i < faceVertices.length - 1; i++) {
-                const triIndices = [faceVertices[0], faceVertices[i], faceVertices[i + 1]];
-                for (const vertStr of triIndices) {
-                    if (webglIndicesMap.has(vertStr)) {
-                        indices.push(webglIndicesMap.get(vertStr));
-                    } else {
-                        const indicesParts = vertStr.split('/');
-                        
-                        let pIdx = parseInt(indicesParts[0]) || 0;
-                        pIdx = pIdx < 0 ? objPositions.length + pIdx : pIdx;
-                        
-                        let tIdx = parseInt(indicesParts[1]) || 0;
-                        tIdx = tIdx < 0 ? objTexcoords.length + tIdx : tIdx;
-                        
-                        let nIdx = parseInt(indicesParts[2]) || 0;
-                        nIdx = nIdx < 0 ? objNormals.length + nIdx : nIdx;
-
-                        const pos = objPositions[pIdx] || [0, 0, 0];
-                        const tex = objTexcoords[tIdx] || [0, 0];
-                        const norm = objNormals[nIdx] || [0, 0, 0];
-
-                        positions.push(...pos);
-                        texCoords.push(...tex);
-                        normals.push(...norm);
-
-                        webglIndicesMap.set(vertStr, nextIndex);
-                        indices.push(nextIndex);
-                        nextIndex++;
-                    }
-                }
-            }
+            processFace(parts, state);
         }
     }
+    
     flushSubMesh();
     return subMeshes;
 }

@@ -21,7 +21,7 @@ export async function setupLuffy(gl) {
 
     const objResponse = await fetch('./assets/luffy/luffy.obj');
     if (!objResponse.ok) {
-        throw new Error(`Falha ao descarregar o OBJ do navio! Código: ${objResponse.status}`);
+        throw new Error(`Falha ao descarregar o OBJ do luffy! Código: ${objResponse.status}`);
     }
 
     const objText = await objResponse.text();
@@ -43,8 +43,6 @@ export async function setupLuffy(gl) {
 
         sub.bufferInfo = twgl.createBufferInfoFromArrays(gl, sub.arrays);
         sub.vao = twgl.createVertexArrayInfo(gl, programInfo, sub.bufferInfo);
-
-        console.log(sub.textureFile);
 
         if (sub.textureFile) {
             let fileName = sub.textureFile.split(/[/\\]/).pop();

@@ -27,8 +27,8 @@ export async function setupChopper(gl) {
     const objText = await objResponse.text();
 
     const mtlResponse = await fetch('./assets/chopper/chopper.mtl');
-    if (!mtlResponse?.ok) {
-        console.error(`ERRO: Não foi possível descarregar o ficheiro MTL (${nomeFicheiroMTL}).`);
+    if (!mtlResponse.ok) {
+        throw new Error(`Falha ao descarregar o MTL do chopper! Código: ${mtlResponse.status}`);
     }
 
     let mtlText = null;
@@ -43,8 +43,6 @@ export async function setupChopper(gl) {
 
         sub.bufferInfo = twgl.createBufferInfoFromArrays(gl, sub.arrays);
         sub.vao = twgl.createVertexArrayInfo(gl, programInfo, sub.bufferInfo);
-
-        console.log(sub.textureFile);
 
         if (sub.textureFile) {
             sub.texture = twgl.createTexture(gl, {
