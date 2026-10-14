@@ -5,6 +5,7 @@ import { setupGoingMerry, drawGoingMerry } from './components/goingMerry/goingMe
 import { setupChopper, drawChopper } from './components/chopper/chopper.js';
 import { setupKaru, drawKaru } from './components/karu/karu.js';
 import { setupLuffy, drawLuffy } from './components/luffy/luffy.js';
+import { setupLuffyChopper, drawLuffyChopper } from './components/luffyChopper/luffyChopper.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
 const gl = canvas.getContext('webgl2');
@@ -102,6 +103,7 @@ async function start() {
     const chopper = await setupChopper(gl);
     const karu = await setupKaru(gl);
     const luffy = await setupLuffy(gl);
+    const luffyChopper = await setupLuffyChopper(gl);
 
     function render(time) {
         const seconds = time * 0.01;
@@ -167,6 +169,7 @@ async function start() {
         drawChopper(gl, matrix4, chopper, viewProjectionMatrix);
         drawKaru(gl, matrix4, karu, viewProjectionMatrix);
         drawLuffy(gl, matrix4, luffy, viewProjectionMatrix);
+        drawLuffyChopper(gl, matrix4, luffyChopper, viewProjectionMatrix);
         
         requestAnimationFrame(render);
     }
