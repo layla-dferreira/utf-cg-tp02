@@ -2,6 +2,7 @@ import { setupSun, drawSun } from './components/sun/sun.js';
 import { setupClouds, drawClouds } from './components/clouds/clouds.js';
 import { setupOcean, drawOcean } from './components/ocean/ocean.js';
 import { setupGoingMerry, drawGoingMerry } from './components/goingMerry/goingMerry.js';
+import { setupChopper, drawChopper } from './components/chopper/chopper.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
 const gl = canvas.getContext('webgl2');
@@ -96,6 +97,7 @@ async function start() {
     const clouds = await setupClouds(gl);
     const ocean = await setupOcean(gl);
     const goingMerry = await setupGoingMerry(gl);
+    const chopper = await setupChopper(gl);
 
     function render(time) {
         const seconds = time * 0.01;
@@ -158,7 +160,8 @@ async function start() {
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
         drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix);
-
+        drawChopper(gl, matrix4, chopper, viewProjectionMatrix);
+        
         requestAnimationFrame(render);
     }
 
