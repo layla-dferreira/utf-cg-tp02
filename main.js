@@ -167,7 +167,7 @@ async function start() {
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [-12, 15, -10]);
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
         drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
-        drawOcean(gl, matrix4, ocean, viewProjectionMatrix);
+        drawOcean(gl, matrix4, ocean, viewProjectionMatrix, seconds);
         drawChopper(gl, matrix4, chopper, viewProjectionMatrix);
         drawKaru(gl, matrix4, karu, viewProjectionMatrix);
         drawLuffy(gl, matrix4, luffy, viewProjectionMatrix);

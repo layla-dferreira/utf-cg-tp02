@@ -18,7 +18,7 @@ export async function setupOcean(gl) {
     );
 
     const programInfo = twgl.createProgramInfoFromProgram(gl, program);
-    const bufferInfo = twgl.primitives.createDiscBufferInfo(gl, 20, 64);
+    const bufferInfo = twgl.primitives.createPlaneBufferInfo(gl, 39.8, 39.8, 100, 100);
 
     return { 
         programInfo, 
@@ -26,12 +26,18 @@ export async function setupOcean(gl) {
     };
 }
 
-export function drawOcean(gl, matrix4, oceanData, model) {
+export function drawOcean(gl, matrix4, oceanData, viewProjectionMatrix, time) {
+    if (!oceanData) return;
+
     gl.useProgram(oceanData.programInfo.program);
     twgl.setBuffersAndAttributes(gl, oceanData.programInfo, oceanData.bufferInfo);
 
+    const modelMatrix = matrix4.translation([0.0, 0.0, 0.0]);
+
     twgl.setUniforms(oceanData.programInfo, {
-        model: model,
+        viewProjection: viewProjectionMatrix,
+        model: modelMatrix,
+        time: time
     });
 
     twgl.drawBufferInfo(gl, oceanData.bufferInfo);
