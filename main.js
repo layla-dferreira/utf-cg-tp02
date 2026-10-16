@@ -7,6 +7,7 @@ import { setupKaru, drawKaru } from './components/karu/karu.js';
 import { setupLuffy, drawLuffy } from './components/luffy/luffy.js';
 import { setupLuffyChopper, drawLuffyChopper } from './components/luffyChopper/luffyChopper.js';
 import { setupBall, drawBall } from './components/ball/ball.js';
+import { setupSeagull, drawSeagull } from './components/seagull/seagull.js';
 
 const canvas = document.querySelector('.canvas-one-piece');
 const gl = canvas.getContext('webgl2');
@@ -106,6 +107,7 @@ async function start() {
     const luffy = await setupLuffy(gl);
     const luffyChopper = await setupLuffyChopper(gl);
     const ball = await setupBall(gl);
+    const seagull = await setupSeagull(gl);
 
     function render(time) {
         const seconds = time * 0.01;
@@ -172,6 +174,7 @@ async function start() {
         drawKaru(gl, matrix4, karu, viewProjectionMatrix);
         drawLuffy(gl, matrix4, luffy, viewProjectionMatrix);
         drawLuffyChopper(gl, matrix4, luffyChopper, viewProjectionMatrix);
+        drawSeagull(gl, matrix4, seagull, viewProjectionMatrix, seconds);
         drawBall(gl, matrix4, ball, viewProjectionMatrix);
         
         requestAnimationFrame(render);
