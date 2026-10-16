@@ -51,6 +51,21 @@ const cloudPositions = [
     [9, 8, 8]
 ];
 
+let isMusicPlaying = false;
+const musicBackground = new Audio('./assets/musicBinksSake.mp3');
+musicBackground.loop = true;
+musicBackground.volume = 0.5;
+
+document.body.addEventListener('click', () => {
+    if (!isMusicPlaying) {
+        musicBackground.play().then(() => {
+            isMusicPlaying = true;
+        }).catch((error) => {
+            console.log("Aguardando interação para tocar o áudio...");
+        });
+    }
+}, { once: true });
+
 window.addEventListener('keydown', (event) => {
     if (event.key === '1') {
         activeCamera = 1;
@@ -62,6 +77,17 @@ window.addEventListener('keydown', (event) => {
         activePose = (activePose + 1) % 3;
     } else if (event.key === 'l' || event.key === 'L') {
         useLighting = !useLighting;
+    } else if (event.key.toLowerCase() === 'm') {
+        if (isMusicPlaying) {
+            musicBackground.pause();
+            isMusicPlaying = false;
+        } else {
+            musicBackground.play().then(() => {
+                isMusicPlaying = true;
+            }).catch((error) => {
+                console.warn("O navegador bloqueou o áudio. Clique na tela primeiro.", error);
+            });
+        }
     }
 });
 
