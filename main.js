@@ -38,6 +38,16 @@ let isDragging = false;
 let activePose = 0;
 let mouseX = 0;
 let mouseY = 0;
+const cloudPositions = [
+    [-8, 10, -7],
+    [0, 13, -5],
+    [8, 10, -6],
+    [-11, 7, 2],
+    [-5, 11, 7],
+    [6, 12, 5],
+    [-8, 7, 9],
+    [9, 8, 8]
+];
 
 window.addEventListener('keydown', (event) => {
     if (event.key === '1') {
@@ -169,8 +179,9 @@ async function start() {
 
 
         drawSun(gl, matrix4, sun, viewProjectionMatrix);
-        drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [-12, 15, -10]);
-        drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
+        cloudPositions.forEach((position) => {
+            drawClouds(gl, matrix4, clouds, viewProjectionMatrix, position);
+        });
         drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix, seconds);
         drawChopper(gl, matrix4, chopper, viewProjectionMatrix, activePose);

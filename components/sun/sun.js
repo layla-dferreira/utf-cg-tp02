@@ -30,7 +30,7 @@ export function drawSun(gl, matrix4, sunData, model) {
     gl.useProgram(sunData.programInfo.program);
     twgl.setBuffersAndAttributes(gl, sunData.programInfo, sunData.bufferInfo);
 
-    const sunPosition = matrix4.translation([0, 15, -10]);
+    const sunPosition = matrix4.translation([0, 13.6, -2]);
     const modelMatrix = matrix4.multiply(model, sunPosition);
 
     twgl.setUniforms(sunData.programInfo, {

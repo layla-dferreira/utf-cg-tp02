@@ -49,7 +49,7 @@ export function drawSeagull(gl, matrix4, seagullData, viewProjectionMatrix, time
 
     const angle = time * 0.1;
     const radius = 12.0;
-    const height = 10.0 + Math.sin(time * 1.0) * 1.0;
+    const height = 8.0 + Math.sin(time * 1.0) * 1.0;
 
     let seagullPosition = matrix4.translation([
         Math.cos(angle) * radius,
