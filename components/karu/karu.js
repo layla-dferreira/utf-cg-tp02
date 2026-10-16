@@ -60,13 +60,25 @@ export async function setupKaru(gl) {
     return { programInfo, meshes };
 }
 
-export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix) {
+export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix, activePose) {
     if (!karuData?.meshes) return;
 
     gl.useProgram(karuData.programInfo.program);
     gl.disable(gl.CULL_FACE);
 
-    let modelMatrix = matrix4.translation([1.0, 1.3, 0.0]);
+    let modelMatrix = matrix4.identity();
+
+    if (activePose === 0) {
+        modelMatrix = matrix4.translate(modelMatrix, [1.0, 1.3, 0.0]); 
+        modelMatrix = matrix4.rotateY(modelMatrix, 0);                  
+    } else if (activePose === 1) {
+        modelMatrix = matrix4.translate(modelMatrix, [-1.0, 1.3, 0.0]); 
+        modelMatrix = matrix4.rotateY(modelMatrix, -Math.PI / 2);        
+    } else if (activePose === 2) {
+        modelMatrix = matrix4.translate(modelMatrix, [-1.6, 1.96, -1.0]);
+        modelMatrix = matrix4.rotateY(modelMatrix, Math.PI / 2);       
+    }
+
     modelMatrix = matrix4.scale(modelMatrix, [0.02, 0.02, 0.02]);
 
     const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);

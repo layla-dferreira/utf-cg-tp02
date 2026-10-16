@@ -61,13 +61,25 @@ export async function setupLuffy(gl) {
     return { programInfo, meshes };
 }
 
-export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix) {
+export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix, activePose) {
     if (!luffyData?.meshes) return;
 
     gl.useProgram(luffyData.programInfo.program);
     gl.disable(gl.CULL_FACE);
 
-    let modelMatrix = matrix4.translation([0.0, 1.9, 2.2]);
+    let modelMatrix = matrix4.identity();
+
+    if (activePose === 0) {
+        modelMatrix = matrix4.translate(modelMatrix, [0.0, 1.9, 2.2]); 
+        modelMatrix = matrix4.rotateY(modelMatrix, 0);                  
+    } else if (activePose === 1) {
+        modelMatrix = matrix4.translate(modelMatrix, [0.0, 5.3, 0.56]); 
+        modelMatrix = matrix4.rotateY(modelMatrix, Math.PI);        
+    } else if (activePose === 2) {
+        modelMatrix = matrix4.translate(modelMatrix, [1.9, 2.0, -1.06]);
+        modelMatrix = matrix4.rotateY(modelMatrix, -Math.PI / 2);       
+    }
+
     modelMatrix = matrix4.scale(modelMatrix, [1.0, 1.0, 1.0]);
 
     const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);

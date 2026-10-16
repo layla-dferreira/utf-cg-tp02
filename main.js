@@ -35,6 +35,7 @@ let cameraAngleY = {
     camera3: 0
 };
 let isDragging = false;
+let activePose = 0;
 let mouseX = 0;
 let mouseY = 0;
 
@@ -45,6 +46,8 @@ window.addEventListener('keydown', (event) => {
         activeCamera = 2;
     } else if (event.key === '3') {
         activeCamera = 3;
+    } else if (event.key === 'p' || event.key === 'P') {
+        activePose = (activePose + 1) % 3;
     }
 });
 
@@ -170,9 +173,9 @@ async function start() {
         drawClouds(gl, matrix4, clouds, viewProjectionMatrix, [12, 15, -10]);
         drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
         drawOcean(gl, matrix4, ocean, viewProjectionMatrix, seconds);
-        drawChopper(gl, matrix4, chopper, viewProjectionMatrix);
-        drawKaru(gl, matrix4, karu, viewProjectionMatrix);
-        drawLuffy(gl, matrix4, luffy, viewProjectionMatrix);
+        drawChopper(gl, matrix4, chopper, viewProjectionMatrix, activePose);
+        drawKaru(gl, matrix4, karu, viewProjectionMatrix, activePose);
+        drawLuffy(gl, matrix4, luffy, viewProjectionMatrix, activePose);
         drawLuffyChopper(gl, matrix4, luffyChopper, viewProjectionMatrix);
         drawSeagull(gl, matrix4, seagull, viewProjectionMatrix, seconds);
         drawBall(gl, matrix4, ball, viewProjectionMatrix);
