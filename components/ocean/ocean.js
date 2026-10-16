@@ -26,7 +26,7 @@ export async function setupOcean(gl) {
     };
 }
 
-export function drawOcean(gl, matrix4, oceanData, viewProjectionMatrix, time) {
+export function drawOcean(gl, matrix4, oceanData, viewProjectionMatrix, time, sceneConfig) {
     if (!oceanData) return;
 
     gl.useProgram(oceanData.programInfo.program);
@@ -34,9 +34,19 @@ export function drawOcean(gl, matrix4, oceanData, viewProjectionMatrix, time) {
 
     const modelMatrix = matrix4.translation([0.0, 0.0, 0.0]);
 
+    let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
     twgl.setUniforms(oceanData.programInfo, {
         viewProjection: viewProjectionMatrix,
         model: modelMatrix,
+        uLightPos: sceneConfig.sunPos,
+        uViewPos: sceneConfig.camPos,
+        uUseLighting: lightingEnabled,
         time: time
     });
 

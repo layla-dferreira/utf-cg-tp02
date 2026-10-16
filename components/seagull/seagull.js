@@ -26,7 +26,7 @@ export async function setupSeagull(gl) {
     };
 }
 
-export function drawSeagull(gl, matrix4, seagullData, viewProjectionMatrix, time) {
+export function drawSeagull(gl, matrix4, seagullData, viewProjectionMatrix, time, sceneConfig) {
     if (!seagullData) return;
 
     gl.useProgram(seagullData.programInfo.program);
@@ -37,11 +37,21 @@ export function drawSeagull(gl, matrix4, seagullData, viewProjectionMatrix, time
     const yellowColor = [0.8, 0.9, 0.1, 1.0];
     const blackColor = [0.0, 0.0, 0.0, 1.0];
 
+   let lightingEnabled;
+    if (sceneConfig.lighting) {
+        lightingEnabled = 1;
+    } else {
+        lightingEnabled = 0;
+    }
+
     function drawSeagullPart(modelMatrix, scale, color) {
         const scaleModelMatrix = matrix4.scale(modelMatrix, scale);
         twgl.setUniforms(seagullData.programInfo, {
             viewProjection: viewProjectionMatrix,
             model: scaleModelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
             color: color
         });
         twgl.drawBufferInfo(gl, seagullData.bufferInfo);

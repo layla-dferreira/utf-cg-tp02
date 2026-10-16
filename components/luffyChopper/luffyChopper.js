@@ -74,7 +74,7 @@ export async function setupLuffyChopper(gl) {
     return { programInfo, meshes };
 }
 
-export function drawLuffyChopper(gl, matrix4, luffyChopperData, viewProjectionMatrix) {
+export function drawLuffyChopper(gl, matrix4, luffyChopperData, viewProjectionMatrix, sceneConfig) {
     if (!luffyChopperData?.meshes) return;
 
     gl.useProgram(luffyChopperData.programInfo.program);
@@ -83,15 +83,24 @@ export function drawLuffyChopper(gl, matrix4, luffyChopperData, viewProjectionMa
     let modelMatrix = matrix4.translation([-0.26, 3.03, 3.4]);
     modelMatrix = matrix4.scale(modelMatrix, [0.1, 0.1, 0.1]);
 
-    const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);
-
     for (const sub of luffyChopperData.meshes) {
         if (!sub.vao || !sub.bufferInfo) continue;
 
         gl.bindVertexArray(sub.vao.vertexArrayObject || sub.vao);
 
+        let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
         twgl.setUniforms(luffyChopperData.programInfo, {
-            model: finalMatrix,
+            viewProjection: viewProjectionMatrix,
+            model: modelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
             textureSampler: sub.texture || null
         });
         twgl.drawBufferInfo(gl, sub.bufferInfo);

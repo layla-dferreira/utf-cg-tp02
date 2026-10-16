@@ -58,7 +58,7 @@ export async function setupChopper(gl) {
     return { programInfo, meshes };
 }
 
-export function drawChopper(gl, matrix4, chopperData, viewProjectionMatrix, activePose) {
+export function drawChopper(gl, matrix4, chopperData, viewProjectionMatrix, sceneConfig) {
     if (!chopperData?.meshes) return;
 
     gl.useProgram(chopperData.programInfo.program);
@@ -66,6 +66,7 @@ export function drawChopper(gl, matrix4, chopperData, viewProjectionMatrix, acti
 
     let modelMatrix = matrix4.identity();
 
+    let activePose = sceneConfig.pose; 
     if (activePose === 0) {
         modelMatrix = matrix4.translate(modelMatrix, [-1.3, 1.9, -1.2]); 
         modelMatrix = matrix4.rotateY(modelMatrix, 0);                  
@@ -79,15 +80,24 @@ export function drawChopper(gl, matrix4, chopperData, viewProjectionMatrix, acti
 
     modelMatrix = matrix4.scale(modelMatrix, [1.0, 1.0, 1.0]);
 
-    const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);
-
     for (const sub of chopperData.meshes) {
         if (!sub.vao || !sub.bufferInfo) continue;
 
         gl.bindVertexArray(sub.vao.vertexArrayObject || sub.vao);
 
+        let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
         twgl.setUniforms(chopperData.programInfo, {
-            model: finalMatrix,
+            viewProjection: viewProjectionMatrix,
+            model: modelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
             textureSampler: sub.texture || null
         });
         twgl.drawBufferInfo(gl, sub.bufferInfo);

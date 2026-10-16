@@ -61,7 +61,7 @@ export async function setupLuffy(gl) {
     return { programInfo, meshes };
 }
 
-export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix, activePose) {
+export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix, sceneConfig) {
     if (!luffyData?.meshes) return;
 
     gl.useProgram(luffyData.programInfo.program);
@@ -69,6 +69,7 @@ export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix, activePo
 
     let modelMatrix = matrix4.identity();
 
+    let activePose = sceneConfig.pose; 
     if (activePose === 0) {
         modelMatrix = matrix4.translate(modelMatrix, [0.0, 1.9, 2.2]); 
         modelMatrix = matrix4.rotateY(modelMatrix, 0);                  
@@ -82,15 +83,24 @@ export function drawLuffy(gl, matrix4, luffyData, viewProjectionMatrix, activePo
 
     modelMatrix = matrix4.scale(modelMatrix, [1.0, 1.0, 1.0]);
 
-    const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);
-
     for (const sub of luffyData.meshes) {
         if (!sub.vao || !sub.bufferInfo) continue;
 
         gl.bindVertexArray(sub.vao.vertexArrayObject || sub.vao);
 
+        let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
         twgl.setUniforms(luffyData.programInfo, {
-            model: finalMatrix,
+            viewProjection: viewProjectionMatrix,
+            model: modelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
             textureSampler: sub.texture || null
         });
         twgl.drawBufferInfo(gl, sub.bufferInfo);

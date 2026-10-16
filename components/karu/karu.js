@@ -60,7 +60,7 @@ export async function setupKaru(gl) {
     return { programInfo, meshes };
 }
 
-export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix, activePose) {
+export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix, sceneConfig) {
     if (!karuData?.meshes) return;
 
     gl.useProgram(karuData.programInfo.program);
@@ -68,6 +68,7 @@ export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix, activePose
 
     let modelMatrix = matrix4.identity();
 
+    let activePose = sceneConfig.pose;    
     if (activePose === 0) {
         modelMatrix = matrix4.translate(modelMatrix, [1.0, 1.3, 0.0]); 
         modelMatrix = matrix4.rotateY(modelMatrix, 0);                  
@@ -81,15 +82,24 @@ export function drawKaru(gl, matrix4, karuData, viewProjectionMatrix, activePose
 
     modelMatrix = matrix4.scale(modelMatrix, [0.02, 0.02, 0.02]);
 
-    const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);
-
     for (const sub of karuData.meshes) {
         if (!sub.vao || !sub.bufferInfo) continue;
 
         gl.bindVertexArray(sub.vao.vertexArrayObject || sub.vao);
 
+        let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
         twgl.setUniforms(karuData.programInfo, {
-            model: finalMatrix,
+            viewProjection: viewProjectionMatrix,
+            model: modelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
             textureSampler: sub.texture || null
         });
         twgl.drawBufferInfo(gl, sub.bufferInfo);

@@ -10,6 +10,7 @@ uniform float time;
 out vec2 v_texcoord;
 out float v_height;
 out vec2 v_localPosition;
+out vec3 vFragPos;
 
 void main() {
     vec4 pos = position;
@@ -32,6 +33,9 @@ void main() {
 
     finalWave = pow(finalWave, 2.0);
     pos.y += finalWave * waveHeigth;
+
+    vec4 worldPos = model * pos;
+    vFragPos = worldPos.xyz;
 
     gl_Position = viewProjection * model * pos;
 

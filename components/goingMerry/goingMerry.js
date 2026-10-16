@@ -60,7 +60,7 @@ export async function setupGoingMerry(gl) {
     return { programInfo, meshes };
 }
 
-export function drawGoingMerry(gl, matrix4, merryData, viewProjectionMatrix) {
+export function drawGoingMerry(gl, matrix4, merryData, viewProjectionMatrix, sceneConfig) {
     if (!merryData?.meshes) return;
 
     gl.useProgram(merryData.programInfo.program);
@@ -69,8 +69,6 @@ export function drawGoingMerry(gl, matrix4, merryData, viewProjectionMatrix) {
 
     let modelMatrix = matrix4.translation([0.0, 0.8, 0.0]);
     modelMatrix = matrix4.scale(modelMatrix, [0.003, 0.003, 0.003]);
-
-    const finalMatrix = matrix4.multiply(viewProjectionMatrix, modelMatrix);
 
     for (const sub of merryData.meshes) {
         if (!sub.bufferInfo) continue;
@@ -84,8 +82,19 @@ export function drawGoingMerry(gl, matrix4, merryData, viewProjectionMatrix) {
             gl.bindVertexArray(vaoToBind);
         }
 
+        let lightingEnabled;
+        if (sceneConfig.lighting) {
+            lightingEnabled = 1;
+        } else {
+            lightingEnabled = 0;
+        }
+
         const uniforms = {
-            model: finalMatrix,
+            viewProjection: viewProjectionMatrix,
+            model: modelMatrix,
+            uLightPos: sceneConfig.sunPos,
+            uViewPos: sceneConfig.camPos,
+            uUseLighting: lightingEnabled,
         };
 
         if (sub.texture) {

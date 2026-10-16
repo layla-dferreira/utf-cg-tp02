@@ -34,10 +34,12 @@ let cameraAngleY = {
     camera2: Math.PI / 4,
     camera3: 0
 };
+let useLighting = true;
 let isDragging = false;
 let activePose = 0;
 let mouseX = 0;
 let mouseY = 0;
+
 const cloudPositions = [
     [-8, 10, -7],
     [0, 13, -5],
@@ -58,6 +60,8 @@ window.addEventListener('keydown', (event) => {
         activeCamera = 3;
     } else if (event.key === 'p' || event.key === 'P') {
         activePose = (activePose + 1) % 3;
+    } else if (event.key === 'l' || event.key === 'L') {
+        useLighting = !useLighting;
     }
 });
 
@@ -176,19 +180,26 @@ async function start() {
         const cameraMatrix = matrix4.lookAt(cameraPosition, target, up);
         const viewMatrix = matrix4.inverse(cameraMatrix);
         const viewProjectionMatrix = matrix4.multiply(projectionMatrix, viewMatrix);
+        const sunPosition = [0.0, 13.6, -2];
 
+        const sceneConfig = {
+            sunPos: sunPosition,
+            camPos: cameraPosition,
+            lighting: useLighting,
+            pose: activePose
+        };
 
         drawSun(gl, matrix4, sun, viewProjectionMatrix);
         cloudPositions.forEach((position) => {
-            drawClouds(gl, matrix4, clouds, viewProjectionMatrix, position);
+            drawClouds(gl, matrix4, clouds, viewProjectionMatrix, position, sceneConfig);
         });
-        drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix);
-        drawOcean(gl, matrix4, ocean, viewProjectionMatrix, seconds);
-        drawChopper(gl, matrix4, chopper, viewProjectionMatrix, activePose);
-        drawKaru(gl, matrix4, karu, viewProjectionMatrix, activePose);
-        drawLuffy(gl, matrix4, luffy, viewProjectionMatrix, activePose);
-        drawLuffyChopper(gl, matrix4, luffyChopper, viewProjectionMatrix);
-        drawSeagull(gl, matrix4, seagull, viewProjectionMatrix, seconds);
+        drawGoingMerry(gl, matrix4, goingMerry, viewProjectionMatrix, sceneConfig);
+        drawOcean(gl, matrix4, ocean, viewProjectionMatrix, seconds, sceneConfig);
+        drawChopper(gl, matrix4, chopper, viewProjectionMatrix, sceneConfig);
+        drawKaru(gl, matrix4, karu, viewProjectionMatrix, sceneConfig);
+        drawLuffy(gl, matrix4, luffy, viewProjectionMatrix, sceneConfig);
+        drawLuffyChopper(gl, matrix4, luffyChopper, viewProjectionMatrix, sceneConfig);
+        drawSeagull(gl, matrix4, seagull, viewProjectionMatrix, seconds, sceneConfig);
         drawBall(gl, matrix4, ball, viewProjectionMatrix);
         
         requestAnimationFrame(render);

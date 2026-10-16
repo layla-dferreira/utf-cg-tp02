@@ -17,6 +17,8 @@ export async function setupClouds(gl) {
         createShader(gl, 'clouds fragment shader', gl.FRAGMENT_SHADER, fragmentShaderCode)
     );
 
+    const programInfo = twgl.createProgramInfoFromProgram(gl, program);
+
     const sphere = twgl.primitives.createSphereVertices(2, 32, 32);
     const sphereVertices = sphere.position;
     const sphereIndices = sphere.indices;
@@ -63,18 +65,31 @@ export async function setupClouds(gl) {
         vao,
         modelLocation, 
         numIndices,
-        numInstances
+        numInstances,
+        programInfo
     };
 }
 
-export function drawClouds(gl, matrix4, cloudsData, model, position) {
+export function drawClouds(gl, matrix4, cloudsData, viewProjectionMatrix, position, sceneConfig) {
     gl.useProgram(cloudsData.program);
     gl.bindVertexArray(cloudsData.vao);
 
-    const cloudsPosition = matrix4.translation(position);
-    const modelMatrix = matrix4.multiply(model, cloudsPosition);
+    const modelMatrix = matrix4.translation(position);
 
-    gl.uniformMatrix4fv(cloudsData.modelLocation, false, modelMatrix);
+    let lightingEnabled;
+    if (sceneConfig.lighting) {
+        lightingEnabled = 1;
+    } else {
+        lightingEnabled = 0;
+    }
+
+    twgl.setUniforms(cloudsData.programInfo, {
+        viewProjection: viewProjectionMatrix,
+        model: modelMatrix,
+        uLightPos: sceneConfig.sunPos,
+        uViewPos: sceneConfig.camPos,
+        uUseLighting: lightingEnabled
+    });
     gl.drawElementsInstanced(gl.TRIANGLES, cloudsData.numIndices, gl.UNSIGNED_SHORT, 0, cloudsData.numInstances);
 
     gl.bindVertexArray(null);
