@@ -39,6 +39,8 @@ let isDragging = false;
 let activePose = 0;
 let mouseX = 0;
 let mouseY = 0;
+let freePosition = [0, 2.6, 0];
+const keys = {};
 
 const cloudPositions = [
     [-8, 10, -7],
@@ -67,6 +69,8 @@ document.body.addEventListener('click', () => {
 }, { once: true });
 
 window.addEventListener('keydown', (event) => {
+    keys[event.key.toLowerCase()] = true;
+
     if (event.key === '1') {
         activeCamera = 1;
     } else if (event.key === '2') {
@@ -89,6 +93,10 @@ window.addEventListener('keydown', (event) => {
             });
         }
     }
+});
+
+window.addEventListener('keyup', (event) => {
+    keys[event.key.toLowerCase()] = false;
 });
 
 canvas.addEventListener('wheel', (event) => {
@@ -188,18 +196,47 @@ async function start() {
             
             cameraPosition = [x, y, z];
         } else if (activeCamera === 3) {
-            cameraPosition = [0, 2.6, 0];
-
             const y = Math.sin(cameraAngleY.camera3);
             const xz = Math.cos(cameraAngleY.camera3);
             
             const x = Math.sin(cameraAngleX.camera3) * xz;
             const z = Math.cos(cameraAngleX.camera3) * xz;
             
+            const forward = [x, y, z];
+            twgl.v3.normalize(forward, forward);
+
+            const right = twgl.v3.cross(forward, [0, 1, 0]);
+            twgl.v3.normalize(right, right);
+
+            const speed = 0.15; 
+            
+            if (keys['w']) {
+                freePosition[0] += forward[0] * speed;
+                freePosition[1] += forward[1] * speed;
+                freePosition[2] += forward[2] * speed;
+            }
+            if (keys['s']) {
+                freePosition[0] -= forward[0] * speed;
+                freePosition[1] -= forward[1] * speed;
+                freePosition[2] -= forward[2] * speed;
+            }
+            if (keys['a']) {
+                freePosition[0] -= right[0] * speed;
+                freePosition[1] -= right[1] * speed;
+                freePosition[2] -= right[2] * speed;
+            }
+            if (keys['d']) {
+                freePosition[0] += right[0] * speed;
+                freePosition[1] += right[1] * speed;
+                freePosition[2] += right[2] * speed;
+            }
+
+            cameraPosition = [...freePosition];
+            
             target = [
-                cameraPosition[0] + x,
-                cameraPosition[1] + y,
-                cameraPosition[2] + z
+                cameraPosition[0] + forward[0],
+                cameraPosition[1] + forward[1],
+                cameraPosition[2] + forward[2]
             ];
         }
 
